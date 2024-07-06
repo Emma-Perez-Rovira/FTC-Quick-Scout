@@ -25,6 +25,7 @@ import javafx.scene.text.Font;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -79,12 +80,20 @@ public class Main extends Application
     TextField team2 = new TextField();
     team1.setPromptText("Team number 1");
     team2.setPromptText("Team number 2");
+    team1.setMaxWidth(screenWidth/2);
+    team2.setMaxWidth(screenWidth/2);
 
-    returnToSeasonSelection.setStyle("-fx-background-color: green;");
-    returnButton.setStyle("-fx-background-color: MediumSeaGreen");
-    stats.setStyle("-fx-background-color: yellow;");
-    button.setStyle("-fx-background-color: pink;");
+    returnToSeasonSelection.setStyle("-fx-background-color: purple;");
+    returnButton.setStyle("-fx-background-color: royalblue");
+    returnButton.setTextFill(Color.WHITE);
+    stats.setStyle("-fx-background-color: white;");
+    button.setStyle("-fx-background-color: black;");
+    button.setTextFill(Color.WHITE);
     awards.setStyle("-fx-background-color: lightBlue;");
+
+    teamComparisonStats.setStyle("-fx-background-color: lightSeaGreen;");
+    teamComparisonStart.setStyle("-fx-background-color: #707070;");
+    teamComparisonAwards.setStyle("-fx-background-color: white;");
     
     Label label;
     TextField tf = new TextField("");
@@ -114,6 +123,10 @@ public class Main extends Application
     vbox.setStyle("-fx-background-color: lightBlue;");
     mainScene = new Scene(vbox, screenLength, screenWidth);
 
+    /**
+    * Sets search systems based on the user input, then changes to the stats scene
+    * Discontinued button, as it is quite useless in the face of the stats button :P
+    */
     multiTeamsEntered.setOnAction(new EventHandler<ActionEvent>(){
       @Override public void handle(ActionEvent e){
         searchSystem = new APITeamManager(Integer.valueOf(team1.getText()), season.getYear());
@@ -121,17 +134,28 @@ public class Main extends Application
         changeToTeamComparisonStats(primaryStage);
       }
     });
+    /**
+    * Makes the hub scene for the multi team comparison, then changes the scene to the afformentioned scene
+    */
     teamComparisonStart.setOnAction(new EventHandler<ActionEvent>(){
       @Override public void handle(ActionEvent e){
         
-        VBox startComparisonBox = new VBox(team1, team2, teamComparisonStats, teamComparisonAwards, returnButton);
+        VBox startComparisonBox = new VBox(label, team1, team2, teamComparisonStats, teamComparisonAwards, returnButton);
+        startComparisonBox.setStyle("-fx-background-color: lightBlue;");
+        startComparisonBox.setAlignment(Pos.CENTER);
         startComparisonBox.setSpacing(20);
         multiTeamSelection = new Scene(startComparisonBox, screenLength, screenWidth);
         changeToMultiTeamSelection(primaryStage);
       }
     });
+    /**
+    * Calculates and formats all the stats for both teams, and adds them to a gridpane, making that the new multi stats scene
+    */
     teamComparisonAwards.setOnAction(new EventHandler<ActionEvent>(){
       @Override public void handle(ActionEvent e){
+        searchSystem = new APITeamManager(Integer.valueOf(team1.getText()), season.getYear());
+        secondarySearchSystem = new APITeamManager(Integer.valueOf(team2.getText()), season.getYear());
+        if(searchSystem.properSetup() && secondarySearchSystem.properSetup()){
         String[] awardsArr1 = searchSystem.awards();
         ObservableList<String> awards1 = FXCollections.observableArrayList();
         ListView<String> awardsList1 = new ListView<>(awards1);
@@ -153,21 +177,32 @@ public class Main extends Application
         Label awardsTitle2 = new Label("Awards that this team has won this season:");
 
         GridPane gridPane = new GridPane();
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        gridPane.getColumnConstraints().addAll(
+            col1,                      // Liquid width for column 1
+            col2                       // Liquid width for column 2
+        );
         gridPane.add(awardsTitle1, 0, 0);
         gridPane.add(awardsList1, 0, 1);
         gridPane.add(awardsTitle2, 1, 0);
         gridPane.add(awardsList2, 1, 1);
         gridPane.add(returnButton, 1, 2);
+        gridPane.setStyle("-fx-background-color: lightPink;");
         multiTeamAwards = new Scene(gridPane, screenLength, screenWidth);
         changeToTeamComparisonAwards(primaryStage);
-        
+        } else {
+          label.setText("Invalid search paramaters");
+        }
       }
     });
     teamComparisonStats.setOnAction(new EventHandler<ActionEvent>(){
       @Override public void handle(ActionEvent e){
         searchSystem = new APITeamManager(Integer.valueOf(team1.getText()), season.getYear());
         secondarySearchSystem = new APITeamManager(Integer.valueOf(team2.getText()), season.getYear());
-
+        if(searchSystem.properSetup() && secondarySearchSystem.properSetup()){
         ObservableList<String> stats = FXCollections.observableArrayList();
         ListView<String> statsList = new ListView<>(stats);
 
@@ -296,8 +331,12 @@ public class Main extends Application
         statsGrid.add(statsList, 0,5);
         statsGrid.add(statsList2, 1,5);
         statsGrid.add(returnButton, 1,6);
+        statsGrid.setStyle("-fx-background-color: lightPink;");
         multiTeamStats = new Scene(statsGrid, screenLength, screenWidth);
         changeToTeamComparisonStats(primaryStage);
+        } else {
+          label.setText("Invalid search paramaters");
+        }
       }
     });
     awards.setOnAction(new EventHandler<ActionEvent>(){
@@ -418,7 +457,7 @@ public class Main extends Application
             label.setText("Invalid search paramaters");
           }
         }
-        VBox vbox = new VBox(label, tf, button, stats, returnToSeasonSelection);
+        VBox vbox = new VBox(label, tf, button, stats, teamComparisonStart, returnToSeasonSelection);
         vbox.setSpacing(20);
         vbox.setAlignment(Pos.CENTER);
         vbox.setStyle("-fx-background-color: lightBlue;");
@@ -477,15 +516,24 @@ public class Main extends Application
   public void changeToAwardsScene(Stage stage){
     stage.setScene(awardsScene);
   }
-
+  /**
+  *  @Input Stage stage
+  * Changes the scene of the stage given to multiTeamSelection
+  */
   public void changeToMultiTeamSelection(Stage stage){
     stage.setScene(multiTeamSelection);
   }
-
+  /**
+  *  @Input Stage stage
+  * Changes the scene of the stage given to multiTeamStats
+  */
   public void changeToTeamComparisonStats(Stage stage){
     stage.setScene(multiTeamStats);
   }
-
+  /**
+  *  @Input Stage stage
+  * Changes the scene of the stage given to multiTeamAwards
+  */
   public void changeToTeamComparisonAwards(Stage stage){
     stage.setScene(multiTeamAwards);
 
