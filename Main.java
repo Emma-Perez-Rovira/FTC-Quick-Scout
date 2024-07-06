@@ -1,6 +1,6 @@
 /********************************************************************************************/
 /*
-  Written by Emma Perez Rovira
+  Written by Emma
   Final touches added on 6/6/2024
   Written as both a AP CSA block E assignment and as a hobby project that will be expanded on
   This is a tool that once completed should help simplify the scouting process for FTC teams
