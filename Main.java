@@ -1,7 +1,6 @@
 /********************************************************************************************/
 /*
   Written by Emma
-  Final touches added on 6/6/2024
   Written as both a AP CSA block E assignment and as a hobby project that will be expanded on
   This is a tool that once completed should help simplify the scouting process for FTC teams
 */
@@ -41,7 +40,8 @@ Clean up code (started on 5/28)
 Make GUI more interesting - Done
 Todo (if time permits):
 Awards listing - Done
-Team comparisons
+Team comparisons - Done
+Add some pride flag themes - Done :)
 */
 public class Main extends Application 
 { 
@@ -76,6 +76,7 @@ public class Main extends Application
     Button teamComparisonStats = new Button("Stats");
     Button teamComparisonAwards = new Button("Awards");
     Button multiTeamsEntered = new Button("Done");
+    Button returnMulti = new Button("Return");
     TextField team1 = new TextField();
     TextField team2 = new TextField();
     team1.setPromptText("Team number 1");
@@ -84,16 +85,19 @@ public class Main extends Application
     team2.setMaxWidth(screenWidth/2);
 
     returnToSeasonSelection.setStyle("-fx-background-color: purple;");
-    returnButton.setStyle("-fx-background-color: royalblue");
-    returnButton.setTextFill(Color.WHITE);
-    stats.setStyle("-fx-background-color: white;");
+    returnToSeasonSelection.setTextFill(Color.WHITE);
+    returnButton.setStyle("-fx-background-color: white");
+    //returnButton.setTextFill(Color.WHITE);
+    stats.setStyle("-fx-background-color: #707070;");
+    stats.setTextFill(Color.WHITE);
     button.setStyle("-fx-background-color: black;");
     button.setTextFill(Color.WHITE);
-    awards.setStyle("-fx-background-color: lightBlue;");
+    awards.setStyle("-fx-background-color: #FF5011;");
 
     teamComparisonStats.setStyle("-fx-background-color: lightSeaGreen;");
-    teamComparisonStart.setStyle("-fx-background-color: #707070;");
+    teamComparisonStart.setStyle("-fx-background-color: white;");
     teamComparisonAwards.setStyle("-fx-background-color: white;");
+    returnMulti.setStyle("-fx-background-color: lightBlue");
     
     Label label;
     TextField tf = new TextField("");
@@ -139,7 +143,7 @@ public class Main extends Application
     */
     teamComparisonStart.setOnAction(new EventHandler<ActionEvent>(){
       @Override public void handle(ActionEvent e){
-        
+        returnButton.setStyle("-fx-background-color: royalblue");
         VBox startComparisonBox = new VBox(label, team1, team2, teamComparisonStats, teamComparisonAwards, returnButton);
         startComparisonBox.setStyle("-fx-background-color: lightBlue;");
         startComparisonBox.setAlignment(Pos.CENTER);
@@ -148,6 +152,17 @@ public class Main extends Application
         changeToMultiTeamSelection(primaryStage);
       }
     });
+    returnMulti.setOnAction(new EventHandler<ActionEvent>(){
+        @Override public void handle(ActionEvent e){
+          
+          VBox startComparisonBox = new VBox(label, team1, team2, teamComparisonStats, teamComparisonAwards, returnButton);
+          startComparisonBox.setStyle("-fx-background-color: lightBlue;");
+          startComparisonBox.setAlignment(Pos.CENTER);
+          startComparisonBox.setSpacing(20);
+          multiTeamSelection = new Scene(startComparisonBox, screenLength, screenWidth);
+          changeToMultiTeamSelection(primaryStage);
+        }
+      });
     /**
     * Calculates and formats all the stats for both teams, and adds them to a gridpane, making that the new multi stats scene
     */
@@ -163,18 +178,18 @@ public class Main extends Application
          awards1.add(awardsArr1[i]);
         }
         awardsList1.setStyle("-fx-font-family: Monospaced;");
-        Label awardsTitle1 = new Label("Awards that this team has won this season:");
+        Label awardsTitle1 = new Label("Awards that " + searchSystem.teamName() + " has won this season:");
 
         
 
-        String[] awardsArr2 = searchSystem.awards();
+        String[] awardsArr2 = secondarySearchSystem.awards();
         ObservableList<String> awards2 = FXCollections.observableArrayList();
         ListView<String> awardsList2 = new ListView<>(awards2);
         for(int i = 0; i < awardsArr2.length; i++){
          awards2.add(awardsArr2[i]);
         }
         awardsList2.setStyle("-fx-font-family: Monospaced;");
-        Label awardsTitle2 = new Label("Awards that this team has won this season:");
+        Label awardsTitle2 = new Label("Awards that " + secondarySearchSystem.teamName() + " has won this season:");
 
         GridPane gridPane = new GridPane();
         ColumnConstraints col1 = new ColumnConstraints();
@@ -189,7 +204,7 @@ public class Main extends Application
         gridPane.add(awardsList1, 0, 1);
         gridPane.add(awardsTitle2, 1, 0);
         gridPane.add(awardsList2, 1, 1);
-        gridPane.add(returnButton, 1, 2);
+        gridPane.add(returnMulti, 1, 2);
         gridPane.setStyle("-fx-background-color: lightPink;");
         multiTeamAwards = new Scene(gridPane, screenLength, screenWidth);
         changeToTeamComparisonAwards(primaryStage);
@@ -286,10 +301,10 @@ public class Main extends Application
           stats2.add("No data on latest event");
           stats2.add("No data on OPR");
         }
-        if(searchSystem.rank() != -1){
-          stats2.add("Global ranking: " + searchSystem.rank());
+        if(secondarySearchSystem.rank() != -1){
+          stats2.add("Global ranking: " + secondarySearchSystem.rank());
         }
-        if(searchSystem.latestAverageScore() != null){
+        if(secondarySearchSystem.latestAverageScore() != null){
           stats2.add("Last event they had an average of: " + secondarySearchSystem.latestAverageScore()[0] + " points");
         } else {
           stats2.add("No data on latest average score");
@@ -330,7 +345,7 @@ public class Main extends Application
         statsGrid.add(isSchoolTeam2,1,3);
         statsGrid.add(statsList, 0,5);
         statsGrid.add(statsList2, 1,5);
-        statsGrid.add(returnButton, 1,6);
+        statsGrid.add(returnMulti, 1,6);
         statsGrid.setStyle("-fx-background-color: lightPink;");
         multiTeamStats = new Scene(statsGrid, screenLength, screenWidth);
         changeToTeamComparisonStats(primaryStage);
@@ -364,6 +379,7 @@ public class Main extends Application
        
     returnButton.setOnAction(new EventHandler<ActionEvent>(){
       @Override public void handle(ActionEvent e){
+        returnButton.setStyle("-fx-background-color: white");
         VBox vbox = new VBox(label, tf, button, stats, teamComparisonStart, returnToSeasonSelection);
         vbox.setSpacing(20);
         vbox.setAlignment(Pos.CENTER);
@@ -434,7 +450,7 @@ public class Main extends Application
         VBox newBox = new VBox(team, whereFrom, rookieYear, statsList, isSchoolTeam, awards, returnButton, returnToSeasonSelection);
         newBox.setAlignment(Pos.CENTER);
         newBox.setSpacing(20);
-        newBox.setStyle("-fx-background-color: white;");
+        newBox.setStyle("-fx-background-color: lightBlue;");
         statsScene = new Scene(newBox, screenLength, screenWidth);
         changeToStatsScene(primaryStage);
         primaryStage.show();

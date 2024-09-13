@@ -1,4 +1,4 @@
-import java.io.BufferedReader;
+19162  import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -160,11 +160,14 @@ public class APIGeneral{
   */
   public int isSchoolTeam(){
     if(!data.isNull("schoolName")){
-      return 1;
-    } else if(!data.isNull("name") && !data.isNull("website")){
-      return 0;
+      if(data.getString("schoolName").equals("Family/Community")){
+        return 0;
+      } else {
+        return 1;
+      }
     }
     return -1;
+    
   }
   
 }
